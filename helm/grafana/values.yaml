@@ -357,26 +357,36 @@ dashboards:
   #   some-dashboard:
   #     json: |
   #       $RAW_JSON
-    k8s-cluster-rsrc-use:
-      file: dashboards/k8s-cluster-rsrc-use.json
-    k8s-node-rsrc-use:
-      file: dashboards/k8s-node-rsrc-use.json
-    k8s-resources-cluster:
-      file: dashboards/k8s-resources-cluster.json
-    k8s-resources-namespace:
-      file: dashboards/k8s-resources-namespace.json
-    k8s-resources-pod:
-      file: dashboards/k8s-resources-pod.json
-    k8s-resources-workload:
-      file: dashboards/k8s-resources-workload.json
-    k8s-resources-workloads-namespace:
-      file: dashboards/k8s-resources-workloads-namespace.json
-    nodes:
-      file: dashboards/nodes.json
-    pods:
-      file: dashboards/pods.json
-    statefulset:
-      file: dashboards/statefulset.json
+    # k8s-cluster-rsrc-use:
+    #   file: dashboards/k8s-cluster-rsrc-use.json
+    # k8s-node-rsrc-use:
+    #   file: dashboards/k8s-node-rsrc-use.json
+    # k8s-resources-cluster:
+    #   file: dashboards/k8s-resources-cluster.json
+    # k8s-resources-namespace:
+    #   file: dashboards/k8s-resources-namespace.json
+    # k8s-resources-pod:
+    #   file: dashboards/k8s-resources-pod.json
+    # k8s-resources-workload:
+    #   file: dashboards/k8s-resources-workload.json
+    # k8s-resources-workloads-namespace:
+    #   file: dashboards/k8s-resources-workloads-namespace.json
+    # nodes:
+    #   file: dashboards/nodes.json
+    # pods:
+    #   file: dashboards/pods.json
+    # statefulset:
+    #   file: dashboards/statefulset.json
+    cardano-application-dashboard-v2:
+      file: dashboards/cardano-application-dashboard-v2.json
+    cardano-application-dashboard:
+      file: dashboards/cardano-application-dashboard.json
+    cardano-application-grouped-dashboard:
+      file: dashboards/cardano-application-grouped-dashboard.json
+    cardano-byron-reboot:
+      file: dashboards/cardano-byron-reboot.json
+    cardano-chain-sync-debug:
+      file: dashboards/cardano-chain-sync-debug.json
     prometheus-stats:
       gnetId: 1860
       revision: 18

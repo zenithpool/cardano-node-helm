@@ -10,6 +10,10 @@ spec:
       {{- include "cardano-node.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "12798"
       labels:
         {{- include "cardano-node.selectorLabels" . | nindent 8 }}
     spec:
@@ -24,6 +28,8 @@ spec:
           ports:
             - containerPort: {{ .Values.cardano_node.port }}
               protocol: TCP
+            - containerPort: 12798
+              protocol: TCP
           env:
             {{- toYaml .Values.cardano_node.env | nindent 12 }}
           volumeMounts:
@@ -33,6 +39,8 @@ spec:
               mountPath: /ipc
             - name: postgres-secrets
               mountPath: /run/secrets
+            - name: cardano-config
+              mountPath: /configuration
           resources:
             {{- toYaml .Values.cardano_node.resources | nindent 12 }}
         - name: "cardano-db-sync"
@@ -103,4 +111,11 @@ spec:
                   name: postgres-user
               - secret:
                   name: postgres-password
+        - name: cardano-config
+          projected:
+            sources:
+              - configMap:
+                  name: cardano-node-config
+              - configMap:
+                  name: cardano-node-topology
 
