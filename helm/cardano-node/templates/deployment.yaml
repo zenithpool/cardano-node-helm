@@ -13,7 +13,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: /metrics
-        prometheus.io/port: "12798"
+        prometheus.io/port: "{{ .Values.cardano_node.prometheus_port }}"
       labels:
         {{- include "cardano-node.selectorLabels" . | nindent 8 }}
     spec:
@@ -28,7 +28,9 @@ spec:
           ports:
             - containerPort: {{ .Values.cardano_node.port }}
               protocol: TCP
-            - containerPort: 12798
+            - containerPort: {{ .Values.cardano_node.prometheus_port }}
+              protocol: TCP
+            - containerPort: {{ .Values.cardano_node.ekg_port }}
               protocol: TCP
           env:
             {{- toYaml .Values.cardano_node.env | nindent 12 }}
@@ -43,6 +45,7 @@ spec:
               mountPath: /configuration
           resources:
             {{- toYaml .Values.cardano_node.resources | nindent 12 }}
+        {{ if .Values.cardano_db_sync.enabled }}
         - name: "cardano-db-sync"
           image: "{{ .Values.cardano_db_sync.image.repository }}:{{ .Values.cardano_db_sync.image.tag }}"
           imagePullPolicy: {{ .Values.cardano_db_sync.image.pullPolicy }}
@@ -55,6 +58,7 @@ spec:
               mountPath: /run/secrets
           resources:
             {{- toYaml .Values.cardano_db_sync.resources | nindent 12 }}
+        {{ end }}
         {{ if .Values.cardano_explorer_api.enabled }}
         - name: "cardano-explorer-api"
           image: "{{ .Values.cardano_explorer_api.image.repository }}:{{ .Values.cardano_explorer_api.image.tag }}"

@@ -8,6 +8,8 @@ cardano_node:
     pullPolicy: Always
     tag: master
   port: 3001
+  ekg_port: 12788
+  prometheus_port: 12798
   env:
     - name: NETWORK
       value: "shelley_staging"
@@ -23,6 +25,8 @@ cardano_node:
       memory: 512Mi
 
 cardano_db_sync:
+  # set enable to true if postgres is configured
+  enabled: false
   image:
     repository: inputoutput/cardano-db-sync
     pullPolicy: Always

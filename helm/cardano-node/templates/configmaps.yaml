@@ -6,12 +6,11 @@ data:
   configuration.yaml: |
     ApplicationName: cardano-sl
     ApplicationVersion: 0
-    GenesisFile: "/nix/store/dkbnz9irv7s2bmff3vj8yhsplpynhzdw-shelley-staging-genesis.json"
+    GenesisFile: "/nix/store/7106qjwral616j6p5049m7hhi5ih0r33-testnet-genesis.json"
     LastKnownBlockVersion-Alt: 0
     LastKnownBlockVersion-Major: 1
     LastKnownBlockVersion-Minor: 0
     NodeId: 0
-    PBftSignatureThreshold: 0.5
     Protocol: RealPBFT
     RequiresNetworkMagic: RequiresMagic
     TraceBlockFetchClient: false
@@ -109,4 +108,22 @@ data:
     - scFormat: ScText
       scKind: StdoutSK
       scName: stdout
-      scRotation:
+      scRotation: 
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-node-topology
+data:
+  topology.json: |
+    {
+      "Producers":
+        [
+          {
+            "addr": "relays-new.cardano-testnet.iohkdev.io",
+            "port": 3001,
+            "valency": 1
+          }
+        ]
+    }
