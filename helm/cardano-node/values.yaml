@@ -1,0 +1,115 @@
+# Values for cardano node
+# Maintainer is Philip Schmidt
+
+
+cardano_node:
+  image:
+    repository: inputoutput/cardano-node
+    pullPolicy: Always
+    tag: master
+  port: 3001
+  env:
+    - name: NETWORK
+      value: "shelley_staging"
+  service:
+    type: ClusterIP
+    port: 3001
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+    requests:
+      cpu: 1000m
+      memory: 512Mi
+
+cardano_db_sync:
+  image:
+    repository: inputoutput/cardano-db-sync
+    pullPolicy: Always
+    tag: master
+  env:
+    - name: NETWORK
+      value: "shelley_staging"
+    - name: POSTGRES_HOST
+      value: "postgres"
+    - name: POSTGRES_PORT
+      value: "5432"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+
+cardano_explorer_api:
+  enabled: false
+  image:
+    repository: inputoutput/cardano-explorer-api
+    pullPolicy: Always
+    tag: master
+  port: 8100
+  service:
+    type: ClusterIP
+    port: 8100
+  env:
+    - name: POSTGRES_HOST
+      value: "postgres"
+    - name: POSTGRES_PORT
+      value: "5432"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+cardano_submit_api:
+  enabled: false
+  image:
+    repository: inputoutput/cardano-submit-api
+    pullPolicy: Always
+    tag: master
+  port: 8101
+  service:
+    type: ClusterIP
+    port: 8101
+  env:
+    - name: NETWORK
+      value: "shelley_staging"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

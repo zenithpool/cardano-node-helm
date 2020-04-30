@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cardano-node.fullname" . }}
+  labels:
+    {{- include "cardano-node.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cardano-node.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "cardano-node.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "cardano-node"
+          image: "{{ .Values.cardano_node.image.repository }}:{{ .Values.cardano_node.image.tag }}"
+          imagePullPolicy: {{ .Values.cardano_node.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.cardano_node.port }}
+              protocol: TCP
+          env:
+            {{- toYaml .Values.cardano_node.env | nindent 12 }}
+          volumeMounts:
+            - name: node-db
+              mountPath: /data/db
+            - name: node-ipc
+              mountPath: /ipc
+            - name: postgres-secrets
+              mountPath: /run/secrets
+          resources:
+            {{- toYaml .Values.cardano_node.resources | nindent 12 }}
+        - name: "cardano-db-sync"
+          image: "{{ .Values.cardano_db_sync.image.repository }}:{{ .Values.cardano_db_sync.image.tag }}"
+          imagePullPolicy: {{ .Values.cardano_db_sync.image.pullPolicy }}
+          env:
+            {{- toYaml .Values.cardano_db_sync.env | nindent 12 }}
+          volumeMounts:
+            - name: node-ipc
+              mountPath: /node-ipc
+            - name: postgres-secrets
+              mountPath: /run/secrets
+          resources:
+            {{- toYaml .Values.cardano_db_sync.resources | nindent 12 }}
+        {{ if .Values.cardano_explorer_api.enabled }}
+        - name: "cardano-explorer-api"
+          image: "{{ .Values.cardano_explorer_api.image.repository }}:{{ .Values.cardano_explorer_api.image.tag }}"
+          imagePullPolicy: {{ .Values.cardano_explorer_api.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.cardano_explorer_api.port }}
+              protocol: TCP
+          env:
+            {{- toYaml .Values.cardano_explorer_api.env | nindent 12 }}
+          volumeMounts:
+            - name: postgres-secrets
+              mountPath: /run/secrets
+          resources:
+            {{- toYaml .Values.cardano_explorer_api.resources | nindent 12 }}
+        {{- end }}
+        {{ if .Values.cardano_submit_api.enabled }}
+        - name: "cardano-submit-api"
+          image: "{{ .Values.cardano_submit_api.image.repository }}:{{ .Values.cardano_submit_api.image.tag }}"
+          imagePullPolicy: {{ .Values.cardano_submit_api.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.cardano_submit_api.port }}
+              protocol: TCP
+          env:
+            {{- toYaml .Values.cardano_submit_api.env | nindent 12 }}
+          volumeMounts:
+            - name: node-ipc
+              mountPath: /node-ipc
+          resources:
+            {{- toYaml .Values.cardano_submit_api.resources | nindent 12 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: node-ipc
+          emptyDir: {}
+        - name: node-db
+          emptyDir: {}
+        - name: postgres-secrets
+          projected:
+            sources:
+              - secret:
+                  name: postgres-db
+              - secret:
+                  name: postgres-user
+              - secret:
+                  name: postgres-password
+

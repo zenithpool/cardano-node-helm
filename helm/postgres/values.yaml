@@ -1,0 +1,40 @@
+# Default values for postgres.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+postgres:
+  image:
+    repository: postgres
+    pullPolicy: IfNotPresent
+    tag: 11.5-alpine
+  port: 5432
+  env:
+    - name: POSTGRES_LOGGING
+      value: "true"
+    - name: POSTGRES_DB_FILE
+      value: "/mnt/secrets/postgres_db"
+    - name: POSTGRES_PASSWORD_FILE
+      value: "/mnt/secrets/postgres_password"
+    - name: POSTGRES_USER_FILE
+      value: "/mnt/secrets/postgres_user"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 5432
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

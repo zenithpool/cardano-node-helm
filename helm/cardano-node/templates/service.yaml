@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "cardano-node"
+  labels:
+    {{- include "cardano-node.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.cardano_node.service.type }}
+  ports:
+    - port: {{ .Values.cardano_node.service.port }}
+      targetPort: {{ .Values.cardano_node.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "cardano-node.selectorLabels" . | nindent 4 }}
+---
+{{ if .Values.cardano_explorer_api.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "cardano-explorer"
+  labels:
+    {{- include "cardano-node.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.cardano_explorer_api.service.type }}
+  ports:
+    - port: {{ .Values.cardano_explorer_api.port }}
+      targetPort: {{ .Values.cardano_explorer_api.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "cardano-node.selectorLabels" . | nindent 4 }}
+---
+{{ end }}
+{{ if .Values.cardano_submit_api.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "cardano-submit"
+  labels:
+    {{- include "cardano-node.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.cardano_submit_api.service.type }}
+  ports:
+    - port: {{ .Values.cardano_submit_api.port }}
+      targetPort: {{ .Values.cardano_submit_api.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "cardano-node.selectorLabels" . | nindent 4 }}
+---
+{{ end }}
