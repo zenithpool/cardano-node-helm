@@ -18,10 +18,10 @@ cardano_node:
     port: 3001
   resources:
     limits:
-      cpu: 2000m
-      memory: 1024Mi
-    requests:
       cpu: 1000m
+      memory: 4024Mi
+    requests:
+      cpu: 500m
       memory: 512Mi
 
 cardano_db_sync:
