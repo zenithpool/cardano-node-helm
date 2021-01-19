@@ -5,9 +5,6 @@
 - kubectl v1.17+
 - kubernetes cluster 1.17+
 
-# Current state
-- no persistent data/volumes. All volumes use emptyDir that can be configured
-
 # Setup
 
 ## Step 0 Setup Docker Image
@@ -18,7 +15,7 @@ $ export VER=1.24.2
 $ docker build -t <custom-image-repo>/cardano-node:${VER} --build-arg CARDANO_NODE_VERSION=${VER} ./cardano-node
 ```
 
-# Setup 1 Deploy cardano node as relay
+## Setup 1 Deploy cardano node as relay
 
 ```
 $ export VER=1.24.2
@@ -35,7 +32,7 @@ $ helm upgrade cardano-relay ./helm/cardano-node --install \
     --set replicas=1
 ```
 
-## Exposing the cardano node relay
+### Exposing the cardano node relay
  - By default the cardano node relay is only exposed from within the cluster. To expose it to the public, you can expose it as a NodePort or LoadBalancer
  ```
 $ export VER=1.24.2
@@ -53,5 +50,5 @@ $ helm upgrade cardano-relay ./helm/cardano-node --install \
     --set replicas=1
 ```
 
- # Setup 2 Deploy cardano node as a block producer
+## Setup 2 Deploy cardano node as a block producer
  TODO
