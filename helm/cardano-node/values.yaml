@@ -1,0 +1,55 @@
+# Values for cardano node
+# Maintainer is Zenith Stake Pool
+
+replicas: 1
+
+cardano_node:
+  image:
+    repository: <custom-image-repo>/cardano-node
+    pullPolicy: IfNotPresent
+    tag: 1.18.0
+  prometheus_port: 12798
+  env: []
+    # - name: NETWORK
+    #   value: "testnet"
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 1
+      memory: 4Gi
+    limits:
+      cpu: 1
+      memory: 4Gi
+  storageClass: "oci" # can be 'gke', 'oci' or 'none'
+  storage:
+    requests: 5Gi
+  topology:
+    Producers:
+      - addr: "relays-new.cardano-mainnet.iohk.io"
+        port: 8081
+        valency: 1
+  
+  relay:
+    enabled: true
+    port: 31400 
+  
+  gateway:
+    enabled: true
+
+  prometheus:
+    port: 12798
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

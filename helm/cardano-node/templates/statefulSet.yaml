@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "cardano-node.fullname" . }}
+  labels:
+    {{- include "cardano-node.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cardano-node.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "cardano-node.fullname" . }}
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "{{ .Values.cardano_node.prometheus.port }}"
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "0.0.0.0/0" # so that istio proxy does not block outboound traffic
+      labels:
+        {{- include "cardano-node.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "cardano-node"
+          image: "{{ .Values.cardano_node.image.repository }}:{{ .Values.cardano_node.image.tag }}"
+          imagePullPolicy: {{ .Values.cardano_node.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.cardano_node.relay.port }}
+              protocol: TCP
+            - containerPort: {{ .Values.cardano_node.prometheus.port }}
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.cardano_node.relay.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 540
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.cardano_node.relay.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 540
+          command: ["cardano-node"]
+          {{ if not .Values.cardano_node.relay.enabled }}
+          args: ["run",
+            "--config", "/configuration/configuration.yaml", 
+            "--database-path", "/data/db", 
+            "--host-addr", "0.0.0.0", 
+            "--port", "{{ .Values.cardano_node.relay.port }}", 
+            "--socket-path", "/ipc/node.socket", 
+            "--topology", "/configuration/topology.json",
+            "--shelley-kes-key", "/nodeop/hot.skey",
+            "--shelley-vrf-key", "/nodeop/vrf.skey", 
+            "--shelley-operational-certificate", "/nodeop/op.cert"
+          ]
+          {{ else }}
+          args: ["run",
+            "--config", "/configuration/configuration.yaml", 
+            "--database-path", "/data/db", 
+            "--host-addr", "0.0.0.0", 
+            "--port", "{{ .Values.cardano_node.relay.port }}", 
+            "--socket-path", "/ipc/node.socket", 
+            "--topology", "/configuration/topology.json"
+          ]
+          {{ end }}
+          env:
+            {{- toYaml .Values.cardano_node.env | nindent 12 }}
+          volumeMounts:
+            - name: node-db
+              mountPath: /data
+            - name: node-ipc
+              mountPath: /ipc
+            - name: cardano-config
+              mountPath: /configuration
+            {{ if not .Values.cardano_node.relay.enabled }}
+            - name: nodeop-secrets
+              mountPath: /nodeop
+            {{ end }}
+          resources:
+            {{- toYaml .Values.cardano_node.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: node-ipc
+          emptyDir: {}
+        - name: cardano-config
+          projected:
+            sources:
+              - configMap:
+                  name:  '{{ include "cardano-node.fullname" . }}-config'
+              - configMap:
+                  name:   '{{ include "cardano-node.fullname" . }}-topology'
+        {{ if not .Values.cardano_node.relay.enabled }}
+        - name: nodeop-secrets
+          projected:
+            defaultMode: 0400
+            sources:
+              - secret:
+                  name: hot.skey
+              - secret:
+                  name: vrf.skey
+              - secret:
+                  name: op.cert
+        {{ end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      {{ if eq .Values.cardano_node.storageClass "oci" }}
+      storageClassName: "oci"
+      {{ end }}
+      resources:
+        requests:
+          storage: {{ .Values.cardano_node.storage.requests }}
+
+
+

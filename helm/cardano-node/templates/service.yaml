@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cardano-node.fullname" . }}
+  labels:
+    {{- include "cardano-node.labels" . | nindent 4 }}
+  annotations:
+    qoqo.dev/service-mode: active-standby
+spec:
+  type: {{ .Values.cardano_node.service.type }}
+  ports:
+    - port: {{ .Values.cardano_node.relay.port }}
+      targetPort: {{ .Values.cardano_node.relay.port }}
+      protocol: TCP
+      name: tcp-relay
+  selector:
+    {{- include "cardano-node.selectorLabels" . | nindent 4 }}
+
